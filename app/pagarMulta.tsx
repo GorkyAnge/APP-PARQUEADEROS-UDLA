@@ -3,10 +3,17 @@ import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import axios from 'axios';
 
+// Define the type 'MultaType'
+type MultaType = {
+  id: number;
+  descripcion: string;
+  valor: number;
+};
+
 export default function PagarMulta() {
   const route = useRoute();
   const navigation = useNavigation();
-  const { multa } = route.params;
+  const { multa } = route.params as { multa: MultaType };
 
   const [customerEmail, setCustomerEmail] = useState('');
   const [cardType, setCardType] = useState('');

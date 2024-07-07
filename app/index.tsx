@@ -21,7 +21,7 @@ export default function HomeScreen() {
       <Link style={styles.buttonText} href="../consultarMultas">Ver Mis Multas</Link>
       </TouchableOpacity>
       <TouchableOpacity style={styles.button}>
-        <Text style={styles.buttonText}>Disponibilidad Parqueaderos</Text>
+      <Link style={styles.buttonText} href="../parkingNotificator">Notificador Parqueaderos</Link>
       </TouchableOpacity>
       <View style={styles.imageContainer}>
         <Image
