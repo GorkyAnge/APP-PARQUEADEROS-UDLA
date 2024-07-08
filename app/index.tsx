@@ -29,7 +29,6 @@ export default function HomeScreen() {
           style={styles.carImage}
         />
       </View>
-      <Text style={styles.findSpotText}>FIND ME A SPOT NOW!</Text>
     </View>
   );
 }

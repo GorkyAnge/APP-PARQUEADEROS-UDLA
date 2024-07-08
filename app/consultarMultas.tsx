@@ -1,21 +1,33 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, FlatList, Alert } from 'react-native';
 import axios from 'axios';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useIsFocused } from '@react-navigation/native';
 
 export default function ConsultarMultas() {
   const [identifier, setIdentifier] = useState('');
   const [multas, setMultas] = useState<{ id: string, descripcion: string, valor: number, fecha: string, pagada: boolean }[]>([]);
   const navigation = useNavigation();
+  const isFocused = useIsFocused();
 
   const fetchMultas = async () => {
+    if (identifier.trim() === '') {
+      return; // No hacer nada si el identificador está vacío
+    }
+
     try {
-      const response = await axios.get(`https://shak-multas.onrender.com/multas/${identifier}`);
-      setMultas(response.data);
+      const response = await axios.get(`https://api-gateway-tq6a.onrender.com/shak-multas/multas/${identifier}`);
+      const sortedMultas = response.data.sort((a: any, b: any) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
+      setMultas(sortedMultas);
     } catch (error) {
       Alert.alert('Error', 'No se pudieron obtener las multas.');
     }
   };
+
+  useEffect(() => {
+    if (isFocused) {
+      fetchMultas();
+    }
+  }, [isFocused]);
 
   return (
     <View style={styles.container}>
@@ -40,7 +52,7 @@ export default function ConsultarMultas() {
             {!item.pagada && (
               <Button
                 title="Pagar Multa"
-                onPress={() => navigation.navigate('pagarMulta', { multa: item })}
+                onPress={() => navigation.navigate('pagarMulta', { multa: item, onPaymentSuccess: fetchMultas })}
                 color="#98002E"
               />
             )}

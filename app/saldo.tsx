@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert, TouchableWithoutFeedback, Keyboard, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, Alert, TouchableWithoutFeedback, Keyboard, KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator, Image } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
 import axios from 'axios';
 
 export default function Saldo() {
@@ -12,7 +13,33 @@ export default function Saldo() {
   const [cvv, setCvv] = useState('');
   const [amount, setAmount] = useState('');
   const [identifier, setIdentifier] = useState('');
+  const [loading, setLoading] = useState(false);
   const currency = 'USD'; // Default currency
+
+  const validateEmail = (email: string) => {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+  };
+
+  const validateCardNumber = (number: string) => {
+    const re = /^\d{16}$/;
+    return re.test(number);
+  };
+
+  const validateExpiryMonth = (month: string) => {
+    const re = /^(0[1-9]|1[0-2])$/;
+    return re.test(month);
+  };
+
+  const validateExpiryYear = (year: string) => {
+    const re = /^\d{2}$/;
+    return re.test(year);
+  };
+
+  const validateCvv = (cvv: string) => {
+    const re = /^\d{3}$/;
+    return re.test(cvv);
+  };
 
   const checkIdentifier = async () => {
     try {
@@ -31,20 +58,44 @@ export default function Saldo() {
   };
 
   const handleRecharge = async () => {
-    // Validar que todos los campos estén llenos
     if (!customerEmail || !cardType || !cardHolderName || !cardNumber || !expiryMonth || !expiryYear || !cvv || !amount || !identifier) {
       Alert.alert('Error', 'Por favor completa todos los campos.');
       return;
     }
 
-    // Verificar el identificador antes de proceder
+    if (!validateEmail(customerEmail)) {
+      Alert.alert('Error', 'Correo electrónico no es válido.');
+      return;
+    }
+
+    if (!validateCardNumber(cardNumber)) {
+      Alert.alert('Error', 'Número de tarjeta no es válido. Debe contener 16 dígitos.');
+      return;
+    }
+
+    if (!validateExpiryMonth(expiryMonth)) {
+      Alert.alert('Error', 'Mes de expiración no es válido.');
+      return;
+    }
+
+    if (!validateExpiryYear(expiryYear)) {
+      Alert.alert('Error', 'Año de expiración no es válido.');
+      return;
+    }
+
+    if (!validateCvv(cvv)) {
+      Alert.alert('Error', 'CVV no es válido. Debe contener 3 dígitos.');
+      return;
+    }
+
     const isIdentifierValid = await checkIdentifier();
     if (!isIdentifierValid) {
       return;
     }
 
     try {
-      const response = await axios.post('https://shak-tarjetas.onrender.com/api/recharge', {
+      setLoading(true);
+      const response = await axios.post('https://api-gateway-tq6a.onrender.com/shak-tarjetas/recharge', {
         app_name: 'Parqueaderos UDLA',
         service: 'Recarga de Identificador',
         customer_email: customerEmail,
@@ -58,10 +109,10 @@ export default function Saldo() {
         currency,
         identifier,
       });
+      setLoading(false);
 
       if (response.status === 200) {
         Alert.alert('Recarga Exitosa', `Recarga de ${amount} ${currency} realizada exitosamente.`);
-        // Restablecer los campos después de una recarga exitosa
         setCustomerEmail('');
         setCardType('');
         setCardHolderName('');
@@ -75,6 +126,7 @@ export default function Saldo() {
         Alert.alert('Error', response.data.message || 'Ocurrió un error durante la recarga.');
       }
     } catch (error) {
+      setLoading(false);
       Alert.alert('Error', 'No se pudo conectar con el servidor.');
     }
   };
@@ -87,11 +139,12 @@ export default function Saldo() {
         keyboardVerticalOffset={80}
       >
         <ScrollView contentContainerStyle={styles.scrollContainer}>
+          <Image source={require('@/assets/images/tarjeta-shakira.png')} style={styles.image} />
           <Text style={styles.title}>Recarga de Saldo</Text>
           <Text style={styles.label}>Ingresa tu placa:</Text>
           <TextInput
             style={styles.input}
-            placeholder="PBO-1234"
+            placeholder="PDF1234"
             value={identifier}
             onChangeText={setIdentifier}
           />
@@ -101,13 +154,20 @@ export default function Saldo() {
             placeholder="Correo electrónico"
             value={customerEmail}
             onChangeText={setCustomerEmail}
+            keyboardType="email-address"
           />
-          <TextInput
-            style={styles.input}
-            placeholder="Tipo de tarjeta"
-            value={cardType}
-            onChangeText={setCardType}
-          />
+
+          <Picker
+            selectedValue={cardType}
+            style={styles.picker}
+            onValueChange={(itemValue) => setCardType(itemValue)}
+          >
+            <Picker.Item label="Selecciona tipo de tarjeta" value="" />
+            <Picker.Item label="VISA" value="VISA" />
+            <Picker.Item label="MASTERCARD" value="MASTERCARD" />
+            <Picker.Item label="DISCOVER" value="DISCOVER" />
+          </Picker>
+
           <TextInput
             style={styles.input}
             placeholder="Nombre del titular"
@@ -152,7 +212,11 @@ export default function Saldo() {
             onChangeText={setAmount}
             keyboardType="numeric"
           />
-          <Button title="Recargar" onPress={handleRecharge} color="#98002E" />
+          {loading ? (
+            <ActivityIndicator size="large" color="#98002E" />
+          ) : (
+            <Button title="Recargar" onPress={handleRecharge} color="#98002E" />
+          )}
         </ScrollView>
       </KeyboardAvoidingView>
     </TouchableWithoutFeedback>
@@ -165,13 +229,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   scrollContainer: {
-    flexGrow: 1,
+    padding: 20,
     alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 50,
   },
   title: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: 'bold',
     color: '#98002E',
     marginBottom: 20,
@@ -183,7 +245,15 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   input: {
-    width: '80%',
+    width: '100%',
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
+    marginBottom: 10,
+  },
+  picker: {
+    width: '100%',
     padding: 10,
     borderWidth: 1,
     borderColor: '#ccc',
@@ -193,7 +263,13 @@ const styles = StyleSheet.create({
   expiryContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    width: '80%',
+    width: '100%',
     marginBottom: 10,
   },
+  image: {
+    width: '100%',
+    height: 200,
+    resizeMode: 'contain',
+    marginBottom: 20,
+  }
 });
