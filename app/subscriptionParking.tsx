@@ -9,8 +9,22 @@ const Subscription = () => {
 
   const handleSubscribe = async () => {
     try {
-      // Aquí puedes realizar la lógica para suscribirse a las notificaciones
-      Alert.alert('Suscripción exitosa', `Te has suscrito a las notificaciones del ${parkingName}`);
+      const response = await fetch('https://api-gateway-tq6a.onrender.com/notification/consume', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          exchange: parkingName,
+          email: email,
+        }),
+      });
+
+      if (response.ok) {
+        Alert.alert('Suscripción exitosa', `Te has suscrito a las notificaciones del ${parkingName}`);
+      } else {
+        Alert.alert('Error', 'No se pudo realizar la suscripción.');
+      }
     } catch (error) {
       Alert.alert('Error', 'No se pudo realizar la suscripción.');
     }
@@ -22,7 +36,7 @@ const Subscription = () => {
       <Text style={styles.subtitle}>Te vas a suscribir a las notificaciones del {parkingName}</Text>
       <TextInput
         style={styles.input}
-        placeholder="Ingresa tu correo"
+        placeholder="example@udla.edu.ec"
         value={email}
         onChangeText={setEmail}
       />
@@ -57,6 +71,7 @@ const styles = StyleSheet.create({
     borderColor: '#ccc',
     borderRadius: 5,
     marginBottom: 20,
+    
   },
 });
 

@@ -1,11 +1,23 @@
 import { HelloWave } from '@/components/HelloWave';
 import React from 'react';
-import { Link } from 'expo-router';
 import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
-import {NavigationContainer} from '@react-navigation/native';
+import { NavigationContainer } from '@react-navigation/native';
+import { FontAwesome5 } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 
+type RootStackParamList = {
+  saldo: undefined;
+  consultarMultas: undefined;
+  parkingNotificator: undefined;
+};
 
-export default function HomeScreen() {
+const HomeScreen = () => {
+  const navigation = useNavigation();
+
+  const handleNavigation = (route: keyof RootStackParamList) => {
+    navigation.navigate(route);
+  };
+
   return (
     <View style={styles.container}>
       <Image
@@ -14,14 +26,17 @@ export default function HomeScreen() {
       />
       <Text style={styles.title}>Bienvenido a UDLA Parqueaderos</Text>
       <HelloWave />
-      <TouchableOpacity style={styles.button}>
-        <Link style={styles.buttonText} href="../saldo">Recargar Saldo</Link>
+      <TouchableOpacity style={styles.button} onPress={() => handleNavigation('saldo')}>
+        <FontAwesome5 name="dollar-sign" size={24} color="#fff" />
+        <Text style={styles.buttonText}>Recargar Saldo</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.button}>
-      <Link style={styles.buttonText} href="../consultarMultas">Ver Mis Multas</Link>
+      <TouchableOpacity style={styles.button} onPress={() => handleNavigation('consultarMultas')}>
+        <FontAwesome5 name="file-invoice-dollar" size={24} color="#fff" />
+        <Text style={styles.buttonText}>Ver Mis Multas</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.button}>
-      <Link style={styles.buttonText} href="../parkingNotificator">Notificador Parqueaderos</Link>
+      <TouchableOpacity style={styles.button} onPress={() => handleNavigation('parkingNotificator')}>
+        <FontAwesome5 name="parking" size={24} color="#fff" />
+        <Text style={styles.buttonText}>Notificador Parqueaderos</Text>
       </TouchableOpacity>
       <View style={styles.imageContainer}>
         <Image
@@ -31,7 +46,7 @@ export default function HomeScreen() {
       </View>
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -53,22 +68,20 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   button: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: '#98002E',
     paddingVertical: 15,
-    paddingHorizontal: 40,
+    paddingHorizontal: 20,
     borderRadius: 25,
     marginVertical: 10,
+    width: '80%',
+    justifyContent: 'center',
   },
   buttonText: {
     color: '#fff',
     fontSize: 16,
-  },
-  loginButton: {
-    marginTop: 10,
-  },
-  loginButtonText: {
-    color: '#98002E',
-    textDecorationLine: 'underline',
+    marginLeft: 10,
   },
   imageContainer: {
     alignItems: 'center',
@@ -78,10 +91,6 @@ const styles = StyleSheet.create({
     width: 270,
     height: 270,
   },
-  findSpotText: {
-    color: '#98002E',
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginTop: 20,
-  },
 });
+
+export default HomeScreen;
