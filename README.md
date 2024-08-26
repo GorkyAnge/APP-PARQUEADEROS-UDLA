@@ -1,5 +1,10 @@
 # Welcome to UDLA PARQUEADEROS app 👋
 
+![26](https://github.com/user-attachments/assets/edf627bb-80e7-4331-80bb-ecbe092dce80)
+![27](https://github.com/user-attachments/assets/4cf358e2-2294-4a22-92a6-f989dba0ef31)
+![28](https://github.com/user-attachments/assets/aac54c8f-7217-4a9c-b454-079b800be2f1)
+
+
 This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
 
 ## Get started
